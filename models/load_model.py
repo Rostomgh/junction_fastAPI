@@ -1,6 +1,5 @@
-import pickle
+import joblib
+import os
 
-def load_model(path: str):
-    with open(path, 'rb') as f:
-        model = pickle.load(f)
-    return model
+model_path = os.path.join(os.path.dirname(__file__), "multioutput_model.pkl")
+model = joblib.load(model_path)

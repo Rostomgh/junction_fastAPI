@@ -1,38 +1,46 @@
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+import pandas as pd
+
 from utils.yolo_handler import run_detection
-import pandas as pd 
-from fastapi import APIRouter, Query
 from utils.labels import env_labels, bact_labels
+from models.load_model import model
 from utils.explain import explain_prediction
 
 router = APIRouter()
 
-def tips_router(
-    Salinity: float = Query(...),
-    DissolvedOxygen: float = Query(...),
-    pH: float = Query(...),
-    SecchiDepth: float = Query(...),
-    WaterDepth: float = Query(...),
-    WaterTemp: float = Query(...),
-    AirTemp: float = Query(...)
-):
-    sample = {
-        'Salinity (ppt)': Salinity,
-        'DissolvedOxygen (mg/L)': DissolvedOxygen,
-        'pH': pH,
-        'SecchiDepth (m)': SecchiDepth,
-        'WaterDepth (m)': WaterDepth,
-        'WaterTemp (C)': WaterTemp,
-        'AirTemp (C)': AirTemp
+# 1. Define the input schema
+class WaterSample(BaseModel):
+    Salinity: float
+    DissolvedOxygen: float
+    pH: float
+    SecchiDepth: float
+    WaterDepth: float
+    WaterTemp: float
+    AirTemp: float
+
+# 2. POST endpoint using JSON body
+@router.post("/tips")
+def tips_router(sample: WaterSample):
+    # 3. Convert to DataFrame
+    data = {
+        'Salinity (ppt)': sample.Salinity,
+        'DissolvedOxygen (mg/L)': sample.DissolvedOxygen,
+        'pH': sample.pH,
+        'SecchiDepth (m)': sample.SecchiDepth,
+        'WaterDepth (m)': sample.WaterDepth,
+        'WaterTemp (C)': sample.WaterTemp,
+        'AirTemp (C)': sample.AirTemp
     }
 
-    df_input = pd.DataFrame([sample])
-    prediction = model.predict(df_input)[0]
+    df_input = pd.DataFrame([data])
 
+    # 4. Run prediction
+    prediction = model.predict(df_input)[0]
     env_quality = env_labels[prediction[0]]
     bact_level = bact_labels[prediction[1]]
-    reasons = explain_prediction(sample, env_quality, bact_level)
+    reasons = explain_prediction(data, env_quality, bact_level)
 
     return {
         "Environment Quality": env_quality,
