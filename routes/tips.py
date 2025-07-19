@@ -10,7 +10,7 @@ from utils.explain import explain_prediction
 
 router = APIRouter()
 
-# 1. Define the input schema
+
 class WaterSample(BaseModel):
     Salinity: float
     DissolvedOxygen: float
@@ -20,10 +20,10 @@ class WaterSample(BaseModel):
     WaterTemp: float
     AirTemp: float
 
-# 2. POST endpoint using JSON body
+
 @router.post("/tips")
 def tips_router(sample: WaterSample):
-    # 3. Convert to DataFrame
+
     data = {
         'Salinity (ppt)': sample.Salinity,
         'DissolvedOxygen (mg/L)': sample.DissolvedOxygen,
@@ -45,5 +45,5 @@ def tips_router(sample: WaterSample):
     return {
         "Environment Quality": env_quality,
         "Bacteria Level": bact_level,
-        "Explanation": reasons or ["✅ Conditions are optimal."]
+        "Explanation": reasons or ["Conditions are optimal."]
     }

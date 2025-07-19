@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from routes.detect import router as detect_router
 from routes.tips import router as tips_router
+from routes.get_color_route import router as analyze_router
 
 app = FastAPI(
     title="YOLOv8 FastAPI Bacteria Detection",
@@ -9,3 +10,4 @@ app = FastAPI(
 
 app.include_router(detect_router, prefix="/v1/api")
 app.include_router(tips_router, prefix="/v1/api")
+app.include_router(analyze_router, prefix="/v1/api") 
